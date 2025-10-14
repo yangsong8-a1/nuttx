@@ -38,6 +38,7 @@
 #include <stdbool.h>
 #include <sys/poll.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/poll.h>
 #include <nuttx/net/netdev_lowerhalf.h>
