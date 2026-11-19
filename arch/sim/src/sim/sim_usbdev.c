@@ -321,26 +321,6 @@ static void sim_rqenqueue(struct sim_rqhead_s *queue,
 }
 
 /****************************************************************************
- * Name: sim_reqabort
- ****************************************************************************/
-
-static void sim_reqabort(struct sim_ep_s *privep,
-                         struct sim_req_s *privreq,
-                         int16_t result)
-{
-  usbtrace(TRACE_DEVERROR(SIM_TRACEERR_REQABORTED),
-           (uint16_t)USB_EPNO(privep->ep.eplog));
-
-  /* Save the result in the request structure */
-
-  privreq->req.result = result;
-
-  /* Callback to the request completion handler */
-
-  privreq->req.callback(&privep->ep, &privreq->req);
-}
-
-/****************************************************************************
  * Name: sim_reqcomplete
  ****************************************************************************/
 
@@ -744,9 +724,13 @@ static int sim_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->xfrd         = 0;
   flags             = enter_critical_section();
 
+  /* Reject the request without calling its callback: class drivers
+   * resubmit from the callback, which would recurse here.
+   */
+
   if (privep->epstate == SIM_EPSTATE_STALLED)
     {
-      sim_reqabort(privep, privreq, -EBUSY);
+      usbtrace(TRACE_DEVERROR(SIM_TRACEERR_REQABORTED), epno);
       leave_critical_section(flags);
       return -EPERM;
     }
