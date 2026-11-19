@@ -829,6 +829,7 @@ static struct sim_ep_s *sim_ep_reserve(struct sim_usbdev_s *priv,
       for (epndx = 1; epndx < SIM_USB_EPNUM; epndx++)
         {
           uint16_t bit = SIM_EP_BIT(epndx);
+
           if ((epset & bit) != 0)
             {
               /* Mark the endpoint no longer available */
@@ -861,6 +862,7 @@ static void sim_ep_unreserve(struct sim_usbdev_s *priv,
                              struct sim_ep_s *privep)
 {
   irqstate_t flags = enter_critical_section();
+
   priv->epavail |= SIM_EP_BIT(USB_EPNO(privep->ep.eplog));
   leave_critical_section(flags);
 }
